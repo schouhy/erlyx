@@ -69,7 +69,6 @@ class TransitionSequenceRecorder(BaseCallback):
 class RewardRecorder(BaseCallback):
     def __init__(self):
         self.rewards = []
-        self.counter = 0
         self.total_reward = None
 
     def on_episode_begin(self, initial_observation):
@@ -80,18 +79,20 @@ class RewardRecorder(BaseCallback):
 
     def on_episode_end(self):
         self.rewards.append(self.total_reward)
-        self.counter += 1
 
     def plot_rewards(self):
         pd.Series(self.rewards).plot()
 
 
 class AgentVersionRecorder(BaseCallback):
-    def __init__(self, agent):
+    def __init__(self, agent, win_reward):
         self.agent = agent
         self.best_agent = None
         self.best_reward = -float('inf')
         self._total_reward = None
+        self._num_wins = 1
+        self._win_reward = win_reward
+        self._win_counter = 0
 
     def on_episode_begin(self, initial_observation: types.ObservationType) -> types.Optional[bool]:
         self._total_reward = 0.
@@ -108,9 +109,13 @@ class AgentVersionRecorder(BaseCallback):
         return
 
     def on_episode_end(self) -> types.Optional[bool]:
-        if self._total_reward > self.best_reward:
+        if self._total_reward > self._win_reward:
+            self._win_counter += 1
+        else:
+            self._win_counter = 0
+        if self._win_counter >= self._num_wins:
             self.best_agent = copy.deepcopy(self.agent)
-            self.best_reward = self._total_reward
-            print(f'new best record: {self._total_reward}')
-        return
+            print(f'Won {self._num_wins} times. Saving agent')
+            self._num_wins += 2
+
 
