@@ -32,8 +32,8 @@ class DeepQLearner(BaseLearner):
         expected_q_value = rewards + 0.99 * next_q_value * (1. - torch.FloatTensor(dones))
 
         expected_q_value = expected_q_value.detach().view(-1)
-        #loss = torch.nn.MSELoss()(q_value, expected_q_value)
-        loss = torch.nn.SmoothL1Loss()(q_value, expected_q_value)
+        loss = torch.nn.MSELoss()(q_value, expected_q_value)
+        # loss = torch.nn.SmoothL1Loss()(q_value, expected_q_value)
         self.losses.append(loss.data.cpu().numpy())
 
         self.optimizer.zero_grad()
