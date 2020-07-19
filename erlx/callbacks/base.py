@@ -46,6 +46,7 @@ class CallbackTuple:
         for cb in self._callbacks:
             outputs.append(cb.call(event, **params))
         self._state = outputs
+        return any(outputs)
 
     def add_callback(self, new_callback):
         self._callbacks = (*self._callbacks, new_callback)
