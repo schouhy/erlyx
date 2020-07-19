@@ -28,12 +28,45 @@ class OnlineUpdater(BaseCallback):
         self._learner.update(self._dataset)
 
 
-class EpsilonDecay(BaseCallback):
-    def __init__(self, agent: Union[EpsilonGreedyAgent, EpsilonStochasticAgent]):
-        self.agent = agent
+class ExponentialEpsilonDecay(BaseCallback):
+    def __init__(
+            self,
+            agent: Union[EpsilonGreedyAgent, EpsilonStochasticAgent],
+            initial_epsilon=1., min_epsilon=0.05, decay_factor=0.99):
+        self._agent = agent
+        self._initial_epsilon = initial_epsilon
+        self._min_epsilon = min_epsilon
+        self._decay_factor = decay_factor
+        self._original_epsilon = None
 
     def on_train_begin(self, *args):
-        self.agent.epsilon = 2.
+        self._original_epsilon = self._agent.epsilon
+        self._agent.epsilon = self._initial_epsilon
 
     def on_step_end(self, action, observation, reward, done):
-        self.agent.epsilon = max(0.05, self.agent.epsilon * 0.99)
+        self._agent.epsilon = max(self._min_epsilon, self._agent.epsilon * self._decay_factor)
+
+    def on_train_end(self):
+        self._agent.epsilon = self._original_epsilon
+
+
+class LinearEpsilonDecay(BaseCallback):
+    def __init__(
+            self,
+            agent: Union[EpsilonGreedyAgent, EpsilonStochasticAgent],
+            initial_epsilon=1., min_epsilon=0.05, decay_step=1e-5):
+        self._agent = agent
+        self._initial_epsilon = initial_epsilon
+        self._min_epsilon = min_epsilon
+        self._decay_step = decay_step
+        self._original_epsilon = None
+
+    def on_train_begin(self, *args):
+        self._original_epsilon = self._agent.epsilon
+        self._agent.epsilon = self._initial_epsilon
+
+    def on_step_end(self, action, observation, reward, done):
+        self._agent.epsilon = max(self._min_epsilon, self._agent.epsilon - self._decay_step)
+
+    def on_train_end(self):
+        self._agent.epsilon = self._original_epsilon
