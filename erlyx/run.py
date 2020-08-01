@@ -13,14 +13,12 @@ def run(environment: BaseEnvironment, agent: BaseAgent, n_episodes: int, callbac
         episode_iterator = tqdm(episode_iterator)
     for _ in episode_iterator:
         episode, observation = environment.new_episode()
-        if callbacks.call(event='on_episode_begin', initial_observation=observation):
-            break
+        if callbacks.call(event='on_episode_begin', initial_observation=observation): break
         done = False
         while not done:
+            if callbacks.call(event='on_step_begin'): break
             action = agent.select_action(observation)
             observation, reward, done = episode.step(action)
-            if callbacks.call(event='on_step_end', action=action, observation=observation, reward=reward, done=done):
-                break
-        if callbacks.call(event='on_episode_end'):
-            break
+            if callbacks.call(event='on_step_end', action=action, observation=observation, reward=reward, done=done): break
+        if callbacks.call(event='on_episode_end'): break
     callbacks.call(event='on_train_end')
