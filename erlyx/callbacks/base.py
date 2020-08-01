@@ -16,6 +16,9 @@ class BaseCallback:
     def on_episode_begin(self, initial_observation: types.ObservationType) -> types.Optional[bool]:
         pass
 
+    def on_step_begin(self):
+        pass
+
     def on_step_end(
             self,
             action: types.ActionType,
