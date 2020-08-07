@@ -17,7 +17,7 @@ class DeepQLearner(BaseLearner):
     ):
         self.policy = policy
         self.batch_size = batch_size
-        self.optimizer = torch.optim.Adam(policy.model.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.AdamW(policy.model.parameters(), lr=learning_rate)
         self.sync_frequency = sync_frequency
         self.losses = []
         self.update_counter = 0
@@ -31,6 +31,9 @@ class DeepQLearner(BaseLearner):
             parameter.requires_grad = False
         target_policy.model.eval()
         return target_policy
+
+    def _update_target_policy(self):
+        self.target_policy.model.load_state_dict(self.policy.model.state_dict())
 
     def update(self, dataset):
         self.update_counter += 1
@@ -66,4 +69,4 @@ class DeepQLearner(BaseLearner):
 
         # Update target policy
         if self.update_counter % self.sync_frequency == 0:
-            self.target_policy = self._make_target_policy()
+            self._update_target_policy()

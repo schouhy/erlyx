@@ -13,11 +13,11 @@ class DoubleDeepQLearner(BaseLearner):
             learning_rate: float,
             sync_frequency: int,
             gamma: float = 0.99,
-            loss_func: Callable = torch.nn.MSELoss()
+            loss_func: Callable = torch.nn.MSELoss(),
     ):
         self.policy = policy
         self.batch_size = batch_size
-        self.optimizer = torch.optim.Adam(policy.model.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.AdamW(policy.model.parameters(), lr=learning_rate)
         self.sync_frequency = sync_frequency
         self.losses = []
         self.update_counter = 0
@@ -31,6 +31,9 @@ class DoubleDeepQLearner(BaseLearner):
             parameter.requires_grad = False
         target_policy.model.eval()
         return target_policy
+
+    def _update_target_policy(self):
+        self.target_policy.model.load_state_dict(self.policy.model.state_dict())
 
     def update(self, dataset):
         self.update_counter += 1
@@ -50,11 +53,11 @@ class DoubleDeepQLearner(BaseLearner):
         q_values = self.policy.model(states)
         q_value = q_values.gather(1, actions.view(-1, 1)).view(-1)
 
-        # compute target
-        next_action = self.policy.model(next_states).argmax(1)
+        # Compute target
+        next_action = self.policy.model(next_states).argmax(1, keepdim=True)
         next_q_values_target = self.target_policy.model(next_states)
-        next_q_value = next_q_values_target.gather(1, next_action.view(-1, 1)).view(-1)
-        target = rewards + self.gamma * next_q_value * (1. - dones)
+        next_q_value = next_q_values_target.gather(1, next_action).view(-1)
+        target = (rewards + self.gamma * next_q_value * (1. - dones)).detach()
 
         # Loss
         loss = self.loss_func(q_value, target)
@@ -68,4 +71,4 @@ class DoubleDeepQLearner(BaseLearner):
 
         # Update target policy
         if self.update_counter % self.sync_frequency == 0:
-            self.target_policy = self._make_target_policy()
+            self._update_target_policy()
