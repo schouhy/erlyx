@@ -1,13 +1,11 @@
 from erlyx.callbacks import BaseCallback
 from erlyx.datasets import BaseDataset
 from erlyx import types
-import erlyx
 
-import numpy as np
 import pandas as pd
 from collections import deque
 from typing import NamedTuple
-import copy
+from pathlib import Path
 
 
 class Transition(NamedTuple):
@@ -67,9 +65,10 @@ class TransitionSequenceRecorder(BaseCallback):
 
 
 class RewardRecorder(BaseCallback):
-    def __init__(self):
+    def __init__(self, log_filepath=None):
         self.rewards = []
         self.total_reward = None
+        self._log_filepath = Path(log_filepath) if log_filepath is not None else None
 
     def on_episode_begin(self, initial_observation):
         self.total_reward = 0
@@ -79,43 +78,10 @@ class RewardRecorder(BaseCallback):
 
     def on_episode_end(self):
         self.rewards.append(self.total_reward)
+        if self._log_filepath is not None:
+            with open(self._log_filepath, 'a') as file:
+                file.write(str(self.total_reward))
+                file.write('\n')
 
     def plot_rewards(self):
         pd.Series(self.rewards).plot()
-
-
-class AgentVersionRecorder(BaseCallback):
-    def __init__(self, agent, win_reward):
-        self.agent = agent
-        self.best_agent = None
-        self.best_reward = -float('inf')
-        self._total_reward = None
-        self._num_wins = 1
-        self._win_reward = win_reward
-        self._win_counter = 0
-
-    def on_episode_begin(self, initial_observation: types.ObservationType) -> types.Optional[bool]:
-        self._total_reward = 0.
-        return
-
-    def on_step_end(
-            self,
-            action: types.ActionType,
-            observation: types.ObservationType,
-            reward: types.RewardType,
-            done: bool
-    ) -> types.Optional[bool]:
-        self._total_reward += reward
-        return
-
-    def on_episode_end(self) -> types.Optional[bool]:
-        if self._total_reward > self._win_reward:
-            self._win_counter += 1
-        else:
-            self._win_counter = 0
-        if self._win_counter >= self._num_wins:
-            self.best_agent = copy.deepcopy(self.agent)
-            print(f'Won {self._num_wins} times. Saving agent')
-            self._num_wins += 2
-
-
