@@ -12,5 +12,5 @@ class GymRenderer(BaseCallback):
         self._env.gym_env.render()
         sleep(self._seconds_per_frame)
 
-    def on_train_end(self):
+    def on_episode_end(self):
         self._env.gym_env.close()
