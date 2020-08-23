@@ -40,6 +40,8 @@ class GymAtariBWEnvironment(GymEnvironment):
         for _ in range(self._repeat):
             observation, _reward, done, _ = self.gym_env.step(action)
             reward += _reward
+            if done:
+                break
             if self._render:
                 self.gym_env.render()
                 sleep(self._render_speed)
