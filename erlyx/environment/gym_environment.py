@@ -25,7 +25,7 @@ class GymAtariBWEnvironment(GymEnvironment):
         self._repeat = repeat
         self._simplified_reward = simplified_reward
         self._render = render
-        self._render_speed = 1/float(fps)
+        self._render_speed = 1 / float(fps)
         self._img_hw = img_hw
 
     def new_episode(self) -> (Episode, types.ObservationType):
@@ -37,17 +37,20 @@ class GymAtariBWEnvironment(GymEnvironment):
 
     def step(self, action):
         reward = 0
+        done = False
         for _ in range(self._repeat):
             observation, _reward, done, _ = self.gym_env.step(action)
             reward += _reward
+            if done:
+                break
             if self._render:
                 self.gym_env.render()
                 sleep(self._render_speed)
         if self._simplified_reward:
-            if reward > 0:
-                reward = 1
-            elif reward < 0:
+            if done:
                 reward = -1
-            else:
-                reward = 0
+            elif reward > 0:
+                reward = max(0., min(reward, 1_000.))
+                reward = reward/1_000. + 1
+
         return types.EpisodeStatus(self._resize_bw(observation), reward, done)

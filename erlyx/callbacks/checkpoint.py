@@ -69,13 +69,14 @@ class PytorchCheckPointer(BaseCallback):
                 file.write(datetime.now().strftime("%d-%m-%Y %H:%M"))
                 file.write('\n')
                 if self._stats[0] == new_mean:
-                    file.write('¡Sungaratungaratun! Tenemos un nuevo record:\n')
-                    file.write(':\n')
-                    file.write(f'mean: {self._stats[0]} ({self._stats[1]})')
-                else:
-                    file.write(f'new mean: {new_mean} ({reward_recorder.rewards})')
+                    file.write('¡Sungaratungaratun! Tenemos un nuevo record:')
                     file.write('\n')
-                    file.write(f'best mean: {self._stats[0]} ({self._stats[1]})')
+                    file.write(f'mean: {self._stats[0]}, rewards: {self._stats[1]}')
+                    file.write('\n')
+                else:
+                    file.write(f'new mean: {new_mean}, rewards: {reward_recorder.rewards}')
+                    file.write('\n')
+                    file.write(f'best mean: {self._stats[0]}, rewards: {self._stats[1]}')
                     file.write('\n')
 
     def _checkpoint(self, name):

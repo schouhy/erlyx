@@ -19,7 +19,7 @@ class DoubleDeepQLearner(BaseLearner):
         self.batch_size = batch_size
         self.optimizer = torch.optim.AdamW(policy.model.parameters(), lr=learning_rate)
         self.sync_frequency = sync_frequency
-        self.losses = []
+        #self.losses = []
         self.update_counter = 0
         self.gamma = gamma
         self.loss_func = loss_func
@@ -61,12 +61,12 @@ class DoubleDeepQLearner(BaseLearner):
 
         # Loss
         loss = self.loss_func(q_value, target)
-        self.losses.append(loss.data.cpu().numpy())
+        #self.losses.append(loss.data.cpu().numpy())
 
         # Gradient descent
         self.optimizer.zero_grad()
         loss.backward()
-        # torch.nn.utils.clip_grad_norm_(policy.model.parameters(), 0.5)
+        torch.nn.utils.clip_grad_norm_(self.policy.model.parameters(), 10)
         self.optimizer.step()
 
         # Update target policy
