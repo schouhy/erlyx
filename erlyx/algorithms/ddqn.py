@@ -66,7 +66,7 @@ class DoubleDeepQLearner(BaseLearner):
         # Gradient descent
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.policy.model.parameters(), 10)
+        #torch.nn.utils.clip_grad_norm_(self.policy.model.parameters(), 10)
         self.optimizer.step()
 
         # Update target policy
