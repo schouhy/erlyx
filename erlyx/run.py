@@ -18,7 +18,7 @@ def run_episodes(environment: BaseEnvironment, agent: BaseAgent, n_episodes: int
         while not done:
             if callbacks.call(event='on_step_begin'): break
             action = agent.select_action(observation)
-            observation, reward, done = episode.step(action)
+            observation, reward, done = episode.step(action.action)
             if callbacks.call(event='on_step_end', action=action, observation=observation, reward=reward,
                               done=done): break
         if callbacks.call(event='on_episode_end'): break
@@ -38,7 +38,7 @@ def run_steps(environment: BaseEnvironment, agent: BaseAgent, n_steps: int, call
         while not done:
             if callbacks.call(event='on_step_begin'): break
             action = agent.select_action(observation)
-            observation, reward, done = episode.step(action)
+            observation, reward, done = episode.step(action.action)
             if callbacks.call(event='on_step_end', action=action, observation=observation, reward=reward, done=done): break
             episode_counter += 1
             if use_tqdm:

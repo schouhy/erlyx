@@ -10,7 +10,7 @@ from pathlib import Path
 
 class Transition(NamedTuple):
     observation: types.ObservationType
-    action: types.ActionType
+    action: types.ActionData
     next_observation: types.ObservationType
     reward: types.RewardType
     done: bool
@@ -26,12 +26,12 @@ class TransitionRecorder(BaseCallback):
 
     def on_step_end(
             self,
-            action: types.ActionType,
+            action: types.ActionData,
             observation: types.ObservationType,
             reward: types.RewardType,
             done: bool
     ):
-        self.dataset.push(Transition(self._prev_observation, action, observation, reward, done))
+        self.dataset.push(Transition(self._prev_observation, action.action, observation, reward, done))
         self._prev_observation = observation
 
 
@@ -47,12 +47,12 @@ class TransitionSequenceRecorder(BaseCallback):
 
     def on_step_end(
             self,
-            action: types.ActionType,
+            action: types.ActionData,
             observation: types.ObservationType,
             reward: types.RewardType,
             done: bool
     ):
-        self._buffer.append(Transition(self._prev_observation, action, observation, reward, done))
+        self._buffer.append(Transition(self._prev_observation, action.action, observation, reward, done))
         self.dataset.push(list(self._buffer))
         self._prev_observation = observation
 

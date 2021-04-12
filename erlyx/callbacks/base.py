@@ -21,7 +21,7 @@ class BaseCallback:
 
     def on_step_end(
             self,
-            action: types.ActionType,
+            action: types.ActionData,
             observation: types.ObservationType,
             reward: types.RewardType,
             done: bool

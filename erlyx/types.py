@@ -11,3 +11,7 @@ class EpisodeStatus(NamedTuple):
     observation: ObservationType
     reward: RewardType
     done: bool
+
+class ActionData(NamedTuple):
+    action: ActionType
+    info: dict = {}
