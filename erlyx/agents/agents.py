@@ -14,7 +14,7 @@ class EpsilonGreedyAgent(PolicyAgent):
 
     def select_action(self, observation: types.ObservationType) -> types.ActionData:
         if np.random.uniform() < self.epsilon:
-            return types.ActionData(action=np.random.choice(self.action_space)
+            return types.ActionData(action=np.random.choice(self.action_space))
         distribution = self.policy.get_distribution(observation)
         return types.ActionData(action=np.argmax(distribution))
 

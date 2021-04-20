@@ -20,8 +20,11 @@ class DequeDataset(BaseDataset):
     def __len__(self):
         return len(self._memory)
 
-    def push(self, data):
-        self._memory.append(data)
+    def push(self, data, batch=False):
+        if batch:
+            self._memory.extend(data)
+        else:
+            self._memory.append(data)
 
     def sample(self, batch_size):
         return random.sample(self._memory, min(batch_size, len(self)))
